@@ -121,3 +121,9 @@ Allocate resources and marketing investments toward regions with strong profitab
 
 This project demonstrates the use of SQL for business intelligence and analytical problem-solving. By transforming raw transactional data into actionable insights, the analysis provides recommendations that can support strategic decision-making and business growth.
 
+## Contact 
+
+If you have any questions or feedback about this project, feel free to connect with me.
+-Linkedin: https://www.linkedin.com/in/oluwafeyikemi-oladele
+-GitHub: https://github.com/Oluwafeyikmi09/Global_Superstore_sql_project
+-Email: oluwafeyikemi2017@gmail.com
