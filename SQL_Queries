@@ -1,0 +1,273 @@
+SQL Queries
+
+--What is total sales?
+
+SELECT 
+SUM(Sales) AS Total_sales
+FROM Global_superstore
+
+--What is total profit?
+
+SELECT 
+ROUND(SUM(Profit),2) AS Total_profit
+FROM Global_superstore
+
+--How many orders exist
+
+SELECT 
+DISTINCT COUNT(Order_ID) AS Total_Orders
+FROM Global_superstore
+
+--How many unique customers 
+SELECT
+DISTINCT COUNT(Customer_ID) Total_customers
+FROM Global_superstore
+
+--What is average sales per order?
+
+SELECT 
+    AVG(OrderSales) AS Average_Sales_Per_Order
+FROM (
+    SELECT 
+        Order_ID,
+        SUM(Sales) AS OrderSales
+    FROM Global_superstore
+    GROUP BY Order_ID
+) AS OrderTotals
+
+
+--What are total quantities sold?
+
+SELECT 
+SUM(Quantity) Total_Quantity
+FROM Global_superstore
+
+--Which category has the highest sales?
+
+SELECT TOP 1
+Category,
+SUM(Sales) Total_sales
+FROM Global_superstore
+GROUP BY Category
+ORDER BY Total_sales DESC
+
+
+--Which sub_category has the lowest profit
+
+SELECT TOP 1
+Sub_Category,
+ROUND(SUM(Profit),2) AS Total_profit
+FROM Global_superstore
+GROUP BY Sub_Category
+ORDER BY Total_profit 
+
+--Which region has the most orders?
+
+SELECT TOP 1
+Region,
+COUNT(Order_ID) Total_orders
+FROM Global_superstore
+GROUP BY Region
+ORDER BY Total_orders DESC 
+
+
+--Monthly sales trend
+SELECT 
+FORMAT(Order_Date, 'yyyy-MMM') AS Month_year, 
+SUM(Sales) Total_sales
+FROM Global_superstore
+GROUP BY FORMAT(Order_Date, 'yyyy-MMM') ,
+YEAR(Order_Date),
+MONTH(Order_Date) 
+ORDER BY 
+YEAR(Order_Date),
+MONTH(Order_Date) 
+
+
+--Yearly sales trend
+SELECT 
+YEAR(Order_Date) AS Yearly_sales, 
+SUM(Sales) Total_sales
+FROM Global_superstore
+GROUP BY YEAR(Order_Date) 
+ORDER BY 
+YEAR(Order_Date)
+
+
+--Which month has the highest sales
+SELECT TOP 1
+FORMAT(Order_Date, 'MMM - yyy'),
+SUM(Sales) Total_sales
+FROM Global_superstore
+GROUP BY FORMAT(Order_Date, 'MMM - yyy')
+ORDER BY Total_sales DESC
+
+
+--Top 10 customers by sales
+SELECT TOP 10
+Customer_Name,
+SUM(Sales) Total_sales
+FROM Global_superstore
+GROUP BY Customer_Name
+ORDER BY Total_sales DESC
+
+
+--Top 10 products by sales
+SELECT TOP 10
+Product_Name,
+SUM(Sales) Total_sales
+FROM Global_superstore
+GROUP BY Product_Name
+ORDER BY Total_sales DESC
+
+
+--Which segment is the most profitable?
+SELECT TOP 1
+Segment,
+ROUND(SUM(Profit),2) Total_profit
+FROM Global_superstore
+GROUP BY Segment
+ORDER BY Total_profit DESC
+
+
+--Sales by region 
+SELECT 
+Region,
+SUM(Sales) AS Total_sales
+FROM Global_superstore
+GROUP BY Region
+ORDER BY Total_sales 
+
+
+--Sales by category
+SELECT 
+Category,
+SUM(Sales) AS Total_sales
+FROM Global_superstore
+GROUP BY Category
+ORDER BY Total_sales 
+
+
+--Profit by country
+SELECT 
+Country,
+COALESCE(ROUND(SUM(Profit),2),0) Total_profit
+FROM Global_superstore
+GROUP BY Country
+ORDER BY Total_profit DESC
+
+
+--Discount vs Profit relationship
+SELECT 
+    Discount,
+    AVG(Profit) AS Avg_Profit,
+    SUM(Sales) AS Total_Sales,
+    COUNT(*) AS Transactions
+FROM Global_superstore
+GROUP BY Discount
+ORDER BY Discount
+
+
+--Customer ranking by total sales
+SELECT 
+Customer_ID,
+Customer_Name,
+SUM(Sales) Total_sales,
+RANK() OVER(ORDER BY SUM(Sales)DESC) Customer_rank
+FROM Global_superstore
+GROUP BY Customer_Name, Customer_ID
+ORDER BY Customer_rank
+
+--Top 10 products in each category
+WITH Product_sales AS (
+SELECT 
+Product_Name,
+Category,
+SUM(Sales) Total_sales,
+ROW_NUMBER() OVER(PARTITION BY Category ORDER BY SUM(Sales)DESC) Rank_Number
+FROM Global_superstore
+GROUP BY Product_Name, Category
+)
+SELECT 
+Product_Name,
+Category,
+Total_sales
+FROM Product_sales
+WHERE Rank_Number <= 10
+ORDER BY  Category, Total_sales
+
+
+--Running total of sales over time
+
+SELECT
+    FORMAT(Order_Date, 'yyy - MMM') YEAR_Month,
+    SUM(Sales) AS Monthly_Sales,
+    SUM(SUM(Sales)) OVER (
+        ORDER BY YEAR(Order_Date), MONTH(Order_Date)
+    ) AS Running_Total_Sales
+FROM Global_superstore
+GROUP BY  FORMAT(Order_Date, 'yyy - MMM'), 
+YEAR(Order_Date),
+ MONTH(Order_Date)   
+ORDER BY
+   YEAR(Order_Date),
+    MONTH(Order_Date)
+
+
+--Month-over-month sales growth
+
+WITH MonthlySales AS
+(
+    SELECT
+    FORMAT(Order_Date, 'yyy - MMM') monthly_trend,
+        YEAR(Order_Date) AS OrderYear,
+        MONTH(Order_Date) AS OrderMonth,
+        SUM(Sales) AS TotalSales
+    FROM Global_superstore
+    GROUP BY FORMAT(Order_Date, 'yyy - MMM'),
+        YEAR(Order_Date),
+        MONTH(Order_Date)
+)
+
+SELECT
+   monthly_trend,
+    TotalSales,
+    LAG(TotalSales) OVER (ORDER BY OrderYear, OrderMonth) AS PreviousMonthSales,
+   CAST(
+   ROUND(
+        (
+            (TotalSales - LAG(TotalSales) OVER (ORDER BY OrderYear, OrderMonth))
+            * 100.0
+            / ISNULL(LAG(TotalSales) OVER (ORDER BY OrderYear, OrderMonth), 0)
+        ),
+        2
+    ) AS FLOAT) AS MoM_Growth_Percentage
+FROM MonthlySales
+ORDER BY OrderYear, OrderMonth;
+
+
+--Profit contribution % per category
+
+SELECT 
+Category,
+SUM(Profit) Total_profit,
+ROUND(
+        (SUM(Profit) * 100.0) /
+SUM(SUM(Profit)) OVER (),
+2
+) AS Profit_contribution
+FROM Global_superstore
+GROUP BY Category
+ORDER BY Total_profit DESC
+
+
+--Average shipping delay
+
+SELECT 
+CAST(ROUND(AVG(DATEDIFF(DAY, Ship_Date, Order_Date) * 1.0),0) AS float)
+FROM Global_superstore
+
+
+
+
+
