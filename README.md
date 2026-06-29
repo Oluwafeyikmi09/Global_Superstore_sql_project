@@ -121,6 +121,24 @@ Allocate resources and marketing investments toward regions with strong profitab
 
 This project demonstrates the use of SQL for business intelligence and analytical problem-solving. By transforming raw transactional data into actionable insights, the analysis provides recommendations that can support strategic decision-making and business growth.
 
+## Sample Query Results
+
+### Monthly Sales Trend
+
+![Monthly Sales Trend](Monthly%20Sales%20Trend.png)
+
+### Top 10 Customers by Sales
+
+![Top 10 Customers by Sales](Top%2010%20Customers%20by%20Sales.png)
+
+### Running Total Sales
+
+![Running Total](Running%20Total.png)
+
+### Month Over Month Growth
+
+![Month Over Month Growth](Month%20Over%20Month%20Growth.png)
+
 ## Contact 
 
 If you have any questions or feedback about this project, feel free to connect with me.
